@@ -104,4 +104,4 @@ if __name__ == 'main':
 
     df = import_data()
     clean_df = clean_data(df)
-    model_df = prepare_model_data(clean_df)
+    X_train, X_test, y_train, y_test, scalers = prepare_model_data(df = clean_df, y_col = 'Bankrupt?')
