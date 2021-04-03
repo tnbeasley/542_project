@@ -40,7 +40,6 @@ def clean_data(df):
     df.drop(col_names, axis=1, inplace=True)
     
     # Drop NA values (if needed)
-    # Drop NA values (if needed)
     num_na_rows = (df.apply(lambda x: sum(x.isnull().values), axis=1) > 0).sum()
     print(f'Dropping {num_na_rows} row(s) with NAs')
     df.dropna(inplace=True)
