@@ -16,17 +16,29 @@ def clean_data(df):
     Yang/Leslie
     """
     
-    # Fix column names
+    # Create a dict to store original column names and new column names 
+    ncol = df.shape[1]
+    keys = df.columns # original column names
+    values = [col.strip().replace(' ','_') for col in df.columns.tolist()] # new column names
+    colname_dict = dict(zip(keys, values))
     
-    # Drop columns with few/one value
+    # Rename column names
+    df.rename(columns=colname_dict, inplace=True)
+    
+    # Check which columns have only one value - return indices and original column names
+    col_ind = [i for i in range(0, ncol) if len(df.iloc[:,i].value_counts()) <= 1]
+    col_names = [df.columns[i] for i in col_ind]
+    
+    # Drop the columns
+    print(f'Dropping columns {col_names} that have only one value')
+    df.drop(col_names, axis=1, inplace=True)
     
     # Drop NA values (if needed)
-    num_na_rows = (df.apply(lambda x: sum(x.isnull().values), axis = 1) > 0).sum()
+    num_na_rows = (df.apply(lambda x: sum(x.isnull().values), axis=1) > 0).sum()
     print(f'Dropping {num_na_rows} row(s) with NAs')
-    df1 = df.dropna()
+    df.dropna(inplace=True)
     
-    # return clean_df
-    pass
+    return df
 
 
 # df = import_data()
