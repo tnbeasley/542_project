@@ -107,6 +107,8 @@ def prepare_model_data(df, y_col, drop_cols = [],
     return X_train, X_test, y_train, y_test, scalers
 
 
+# KMeans ----
+
 def kmeans_clustering(X, y):
     """
     Conduct kmeans clustering to categorize companies
@@ -125,6 +127,8 @@ def kmeans_clustering(X, y):
     
     return result
 
+
+# Create models ----
 
 def logistic_regression(X_train, y_train):
     """
@@ -179,9 +183,6 @@ def model_statistics(clf, X_train, X_test, y_train, y_test):
     """
     
     return 
-
-
-# Create models ----
 
 
 if __name__ == '__main__':
