@@ -116,6 +116,60 @@ def kmeans_clustering(X, y):
     return result
 
 
+def logistic_regression(X_train, y_train):
+    """
+    Amelia
+    """
+
+    
+    return clf
+
+
+def xgboost(X_train, y_train):
+    """
+    Yang
+    """
+    
+    return clf
+
+
+def nearest_neighbors(X_train, y_train):
+    """
+    Leslie
+    """
+    
+    return clf
+
+
+def random_forest(X_train, y_train):
+    """
+    Minoo
+    """
+    
+    return clf
+
+
+def neural_network(X_train, y_train):
+    """
+    Tanner
+    """
+    
+    return clf
+
+def model_statistics(clf, X_train, X_test, y_train, y_test):
+    """
+    Tanner
+    
+    Comparing the statistics for the various models built.
+    * Training time
+    * Accuracy
+    * Precision
+    * Recall
+    * F1 Score
+    """
+    
+    return 
+
 
 # Create models ----
 
