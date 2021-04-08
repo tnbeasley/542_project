@@ -1,3 +1,13 @@
+# Time code function
+def time_it(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        results = func(*args, **kwargs)
+        time_elapsed = time.time()-start
+        print(f'Time: {np.round(time_elapsed, 2)} seconds')
+        return time_elapsed, results
+    return wrapper
+
 # Data engineering ----
 def import_data():
     """
@@ -97,6 +107,8 @@ def prepare_model_data(df, y_col, drop_cols = [],
     return X_train, X_test, y_train, y_test, scalers
 
 
+# KMeans ----
+
 def kmeans_clustering(X, y):
     """
     Conduct kmeans clustering to categorize companies
@@ -116,8 +128,61 @@ def kmeans_clustering(X, y):
     return result
 
 
-
 # Create models ----
+
+def logistic_regression(X_train, y_train):
+    """
+    Amelia
+    """
+
+    
+    return clf
+
+
+def xgboost(X_train, y_train):
+    """
+    Yang
+    """
+    
+    return clf
+
+
+def nearest_neighbors(X_train, y_train):
+    """
+    Leslie
+    """
+    
+    return clf
+
+
+def random_forest(X_train, y_train):
+    """
+    Minoo
+    """
+    
+    return clf
+
+
+def neural_network(X_train, y_train):
+    """
+    Tanner
+    """
+    
+    return clf
+
+def model_statistics(clf, X_train, X_test, y_train, y_test):
+    """
+    Tanner
+    
+    Comparing the statistics for the various models built.
+    * Training time
+    * Accuracy
+    * Precision
+    * Recall
+    * F1 Score
+    """
+    
+    return 
 
 
 if __name__ == '__main__':
