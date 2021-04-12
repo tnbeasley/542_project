@@ -218,10 +218,10 @@ def nearest_neighbors(X_train, y_train, X_test, y_test,min_n,max_n):
             training = knn.score(X_train, y_train)
             test = knn.score(X_test, y_test)
        
-    if test > best_test:
-        best_n = i
-        best_training = training
-        best_test = test
+        if test > best_test:
+            best_n = i
+            best_training = training
+            best_test = test
             
     results = {}
     results['Best N'] = best_n # best number of neighbors
