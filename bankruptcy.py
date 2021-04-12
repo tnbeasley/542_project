@@ -22,9 +22,17 @@ def import_data():
 
 def clean_data(df):
     """
-    This function cleans up the data
+    Purpuse: This function cleans up the data.
     
-    Yang/Leslie
+    Input:
+        * df = data frame with predictor variables and variable of interest
+    
+    Output:
+        * df = cleaned data frame with following features
+        1) Rename column names to replace blank with _
+        2) Remove columns with only one value
+        3) Remove NA values if needed
+
     """
     
     # Create a dict to store original column names and new column names 
@@ -127,6 +135,50 @@ def kmeans_clustering(X, y):
 
 # Create models ----
 @time_it
+def xgb(X_train, X_test, y_train, y_test):
+    """
+    Purpuse: This function creates an XGBoost classifier.
+    
+    Input:
+        * X_train
+        * X_test
+        * y_train
+        * y_test
+        * scalers: dictionary with fit scalers
+    
+    Output:
+        * clf: a trained XGBoost classifier
+        * results: a dict holding train_time, pred_time, acc_train, acc_test, f1_train, and f1_test
+    """
+    from time import time
+    from xgboost import XGBClassifier
+    from sklearn.metrics import accuracy_score, f1_score 
+
+    # Instantiate a classifier
+    clf = XGBClassifier(learning_rate=0.05, n_estimator=300, max_depth=5)
+    
+    # Fit the model to the training data
+    start1 = time() # get start time
+    clf.fit(X_train, y_train)
+    end1 = time() # get end time
+    
+    # Make predictions for the train data and the test data
+    y_pred_train = clf.predict(X_train)
+    start2 = time() # get start time
+    y_pred_test = clf.predict(X_test)
+    end2 = time() # get end time
+    
+    # Evaluate model performance: training time, accuracy, F1 score
+    results = {}
+    results['train_time'] = end1 - start1 # training time in second
+    results['pred_time'] = end2 - start2 # prediction time in second
+    results['acc_train'] = accuracy_score(y_train, y_pred_train) # accuracy for train set
+    results['acc_test'] = accuracy_score(y_test, y_pred_test) # accuracy for test set
+    results['f1_train'] = f1_score(y_train, y_pred_train) # f1 score for train set
+    results['f1_test'] = f1_score(y_test, y_pred_test) # f1 score for test set
+    
+    return clf, results
+
 def logistic_regression(X_train, y_train):
     """
     Amelia
