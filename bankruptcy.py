@@ -137,7 +137,7 @@ def kmeans_clustering(X, y):
 @time_it
 def xgb(X_train, X_test, y_train, y_test):
     """
-    Purpuse: This function creates an XGBoost classifier.
+    Purpose: This function creates an XGBoost classifier.
     
     Input:
         * X_train
@@ -177,8 +177,10 @@ def xgb(X_train, X_test, y_train, y_test):
     results['f1_train'] = f1_score(y_train, y_pred_train) # f1 score for train set
     results['f1_test'] = f1_score(y_test, y_pred_test) # f1 score for test set
     
-    return clf, results
+    return clf
 
+
+@time_it
 def logistic_regression(X_train, y_train):
     """
     Amelia
@@ -361,6 +363,13 @@ if __name__ == '__main__':
     
     
     # Models 
+    # xgboost model
+    xgb_time, xgb_clf = xgb(
+        X_train, X_test, 
+        y_train, y_test
+    )
+    
+    # neural network model
     nn_time, nn_clf = neural_network(
         X_train, y_train, 
         X_test, y_test,
@@ -373,8 +382,8 @@ if __name__ == '__main__':
     
     # Model Statistics
     model_stats = model_statistics(
-        clfs = [nn_clf], 
-        train_times = [nn_time],
+        clfs = [xgb_clf, nn_clf], 
+        train_times = [xgb_time, nn_time],
         X_train = X_train, 
         X_test = X_test, 
         y_train = y_train, 
