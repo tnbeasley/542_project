@@ -212,12 +212,12 @@ def nearest_neighbors(X_train, y_train, X_test, y_test,min_n,max_n):
     
     # loop through all possible nearest neighbors from min_n to max_n
     for i in range(min_n,max_n): 
-            knn = KNeighborsClassifier(n_neighbors=i)
-            knn.fit(X_train, y_train)
+        knn = KNeighborsClassifier(n_neighbors=i)
+        knn.fit(X_train, y_train)
             
-            training = knn.score(X_train, y_train)
-            test = knn.score(X_test, y_test)
-       
+        training = knn.score(X_train, y_train)
+        test = knn.score(X_test, y_test)
+            
         if test > best_test:
             best_n = i
             best_training = training
@@ -228,7 +228,10 @@ def nearest_neighbors(X_train, y_train, X_test, y_test,min_n,max_n):
     results['Best Training'] = best_training # best training set score
     results['Best Test'] = best_test # best test set score
     
-    return results
+    clf = KNeighborsClassifier(n_neighbors=best_n)
+    clf.fit(X_train, y_train)
+    
+    return clf, results
 
 
 @time_it
