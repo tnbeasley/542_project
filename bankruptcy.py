@@ -216,15 +216,6 @@ def logistic_regression(X_train, y_train):
 
 
 @time_it
-def xgboost(X_train, y_train):
-    """
-    Yang
-    """
-    
-    return clf
-
-
-@time_it
 def nearest_neighbors(X_train, y_train, X_test, y_test,min_n,max_n):
     """
     Leslie
