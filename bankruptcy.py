@@ -185,9 +185,34 @@ def logistic_regression(X_train, y_train):
     """
     Amelia
     """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from sklearn.linear_model import LogisticRegression
+    from sklearn import metrics
+    import seaborn as sns
 
-    
-    return clf
+
+    #training the model
+    model = LogisticRegression(solver='liblinear', random_state=0)
+    model.fit(X_train,y_train)
+    #predictions for dataset
+    predictions = model.predict(X_test)
+
+    #score method to check accuracy
+    score = model.score(X_test, y_test)
+    print(score)
+
+    #confusion matrix
+    cm = metrics.confusion_matrix(y_test, predictions)
+    print(cm)
+    #seaborn confusion matrix plot
+    plt.figure(figsize=(9,9))
+    sns.heatmap(cm, annot=True, fmt=".3f", linewidths=.5, square = True, cmap = 'Blues_r');
+    plt.ylabel('Actual label');
+    plt.xlabel('Predicted label');
+    all_sample_title = 'Accuracy Score: {0}'.format(score)
+    plt.title(all_sample_title, size = 15);
+    return model
 
 
 @time_it
