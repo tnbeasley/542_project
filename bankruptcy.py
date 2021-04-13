@@ -216,16 +216,7 @@ def logistic_regression(X_train, y_train):
 
 
 @time_it
-def xgboost(X_train, y_train):
-    """
-    Yang
-    """
-    
-    return clf
-
-
-@time_it
-def nearest_neighbors(X_train, y_train, X_test, y_test,min_n,max_n):
+def nearest_neighbors(X_train, y_train, X_test, y_test, min_n, max_n):
     """
     Leslie
     """
@@ -399,18 +390,18 @@ if __name__ == '__main__':
     )
 
     
-    # Example_1 for the kmeans_clustering function using numpy arrays as inputs:
-    X = np.array([[1, 3], [0, 4], [0, 3],
-              [11, 0], [12, 7], [13, 0]])
-    y = np.array([[1, 10], [17, 2]])
-    result = kmeans_clustering(X, y)
+#     # Example_1 for the kmeans_clustering function using numpy arrays as inputs:
+#     X = np.array([[1, 3], [0, 4], [0, 3],
+#               [11, 0], [12, 7], [13, 0]])
+#     y = np.array([[1, 10], [17, 2]])
+#     result = kmeans_clustering(X, y)
     
-    # Example_2 for the kmeans_clustering function using pandas dataframe as inputs:
-    data1 = [1,2,3,4,5,6,7,8,9,10]
-    data2 = [6,7,1]
-    X = pd.DataFrame(data1)
-    y = pd.DataFrame(data2)
-    result = kmeans_clustering(X, y)
+#     # Example_2 for the kmeans_clustering function using pandas dataframe as inputs:
+#     data1 = [1,2,3,4,5,6,7,8,9,10]
+#     data2 = [6,7,1]
+#     X = pd.DataFrame(data1)
+#     y = pd.DataFrame(data2)
+#     result = kmeans_clustering(X, y)
     
     
     # Models 
@@ -421,11 +412,13 @@ if __name__ == '__main__':
     )
     
     # Nearest Neighbors - not sure if I did this correctly
-    knn_time, knn_clf = nearest_neighbors(
-        X_train, X_test, 
-        y_train, y_test,
-        1, 5
+    knn_time, knn_clf_results = nearest_neighbors(
+        X_train, y_train, 
+        X_test, y_test,
+        min_n = 1, 
+        max_n = 5
     )
+    knn_clf, knn_results = knn_clf_results
     
     # neural network model
     nn_time, nn_clf = neural_network(
