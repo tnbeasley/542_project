@@ -200,12 +200,38 @@ def xgboost(X_train, y_train):
 
 
 @time_it
-def nearest_neighbors(X_train, y_train):
+def nearest_neighbors(X_train, y_train, X_test, y_test,min_n,max_n):
     """
     Leslie
     """
+    from sklearn.neighbors import KNeighborsClassifier
+    # baseline for for loop
+    best_n = 0
+    best_training = 0
+    best_test = 0
     
-    return clf
+    # loop through all possible nearest neighbors from min_n to max_n
+    for i in range(min_n,max_n): 
+        knn = KNeighborsClassifier(n_neighbors=i)
+        knn.fit(X_train, y_train)
+            
+        training = knn.score(X_train, y_train)
+        test = knn.score(X_test, y_test)
+            
+        if test > best_test:
+            best_n = i
+            best_training = training
+            best_test = test
+            
+    results = {}
+    results['Best N'] = best_n # best number of neighbors
+    results['Best Training'] = best_training # best training set score
+    results['Best Test'] = best_test # best test set score
+    
+    clf = KNeighborsClassifier(n_neighbors=best_n)
+    clf.fit(X_train, y_train)
+    
+    return clf, results
 
 
 @time_it
@@ -369,6 +395,13 @@ if __name__ == '__main__':
         y_train, y_test
     )
     
+    # Nearest Neighbors - not sure if I did this correctly
+    knn_time, knn_clf = nearest_neighbors(
+        X_train, X_test, 
+        y_train, y_test,
+        1, 5
+    )
+    
     # neural network model
     nn_time, nn_clf = neural_network(
         X_train, y_train, 
@@ -382,8 +415,8 @@ if __name__ == '__main__':
     
     # Model Statistics
     model_stats = model_statistics(
-        clfs = [xgb_clf, nn_clf], 
-        train_times = [xgb_time, nn_time],
+        clfs = [xgb_clf, knn_clf, nn_clf], 
+        train_times = [xgb_time, knn_time, nn_time],
         X_train = X_train, 
         X_test = X_test, 
         y_train = y_train, 
