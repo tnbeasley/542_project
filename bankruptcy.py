@@ -291,16 +291,7 @@ def neural_network(X_train, y_train, X_test, y_test,
     model = Sequential()
 
     # Add Layers
-    model.add(Dense(hidden_layer_size, input_dim=X_train.shape[1], activation='relu'))
-    model.add(Dropout(dropout_size))
-    model.add(Dense(hidden_layer_size, activation = 'relu'))
-    model.add(Dropout(dropout_size))
-    model.add(Dense(hidden_layer_size, activation = 'relu'))
-    model.add(Dropout(dropout_size))
-    model.add(Dense(hidden_layer_size, activation = 'relu'))
-    model.add(Dropout(dropout_size))
-    model.add(Dense(hidden_layer_size, activation = 'relu'))
-    model.add(Dropout(dropout_size))
+    model.add(Dense(X_train.shape[1], input_dim=X_train.shape[1], activation='relu'))
     model.add(Dense(hidden_layer_size, activation = 'relu'))
     model.add(Dropout(dropout_size))
     model.add(Dense(1, activation='sigmoid'))
@@ -387,7 +378,24 @@ def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test):
     return mod_stats
 
 
-def partial_dependence_plot(clf, df_X, column, scalers, num_test = 50):
+def partial_dependence(clf, df_X, column, scalers, num_test = 30, show_plot = True):
+    """
+    Purpose:
+        Partial dependence analysis is a way to evaluate how the level of variables impact predictions from a predictive model. To do this, it takes a data frame column and substitutes the column's values with one value. It then makes predictions on this data frame with this substituted column and averages the predictions. Then, a new value is tested in column and the process is repeated to see how changing the value in the column impact predictions.
+        
+        This function takes the range of values in the data frame and creates a sequence across this range for the length specified in num_test. Then, all these values are tested for the input model and saved into a data frame.
+        
+    Inputs:
+    * clf = predictive model object
+    * df_X = data frame with columns for model (don't include y column)
+    * column = column to calculate partial dependence values for
+    * scalers = scalers dictionary needed to transform original form of data frame
+    * num_test = how many values to test for this column (from min to max of actual values)
+    * show_plot = whether to show a partial dependence plot
+    
+    Output:
+    * avg_preds = data frame with the average prediction for a given value in the column
+    """
     import matplotlib.pyplot as plt
     
     unique_val = df[column].unique()
@@ -411,11 +419,76 @@ def partial_dependence_plot(clf, df_X, column, scalers, num_test = 50):
         avg_preds['AvgPred'].append(avg_pred)
         
     avg_preds = pd.DataFrame(avg_preds)
-    plt.plot(avg_preds.Value, avg_preds.AvgPred)
-    plt.xlabel(column)
-    plt.title(f'Partial Dependence Plot for {column}')
-    plt.show()
+    avg_preds['column'] = column
+    
+    if show_plot:
+        plt.plot(avg_preds.Value, avg_preds.AvgPred)
+        plt.xlabel(column)
+        plt.title(f'Partial Dependence Plot for {column}')
+        plt.show()
+    
+    return avg_preds
+
+
+def partial_dependence_loop(clf, df_X, scalers, num_test, show_plot):
+    """
+    Purpose:
+        This function loops through all the columns in df_X, performing partial dependence analysis on each.
         
+    Inputs:
+    * clf = predictive model object
+    * df_X = data frame with columns for model (don't include y column)
+    * scalers = scalers dictionary needed to transform original form of data frame
+    * num_test = how many values to test for this column (from min to max of actual values)
+    * show_plot = whether to show a partial dependence plot
+    
+    Output:
+    * partial_dependences_df = data frame with test values and average prediction for each column
+    * partial_dependences_stats = min, max, and range of average predictions for each column
+    """
+    partial_dependences = []
+    counter = 1
+    for col in df_X.columns:
+        part_dep = partial_dependence(clf = nn_clf, df_X = df_X, column = col,
+                                      scalers = scalers, num_test = num_test, show_plot = show_plot)
+        partial_dependences.append(part_dep)
+        print(f'Column {counter}/{len(df_X.columns)} complete')
+        counter += 1
+
+    partial_dependences_df = pd.concat(partial_dependences)
+
+
+    partial_dependences_stats = partial_dependences_df\
+        .groupby('column')['AvgPred']\
+        .agg(['min', 'max'])\
+        .reset_index()
+    partial_dependences_stats['range'] = partial_dependences_stats['max'] - partial_dependences_stats['min']
+
+    return partial_dependences_df, partial_dependences_stats
+
+def plot_top_partial_dependences(partial_dependences_df, partial_dependences_stats, top_n):
+    """
+    Purpose:
+        Plots the top n partial dependences in terms of the largest ranges of average prediction (biggest differences across values of a column)
+        
+    Inputs:
+    * partial_dependences_df = data frame with test values and average prediction for each column
+    * partial_dependences_stats = min, max, and range of average predictions for each column
+    * top_n = how many top columns to plot
+    """
+    import matplotlib.pyplot as plt
+
+    biggest_ranges = partial_dependences_stats\
+        .sort_values('range', ascending = False)\
+        .head(top_n)
+    print(biggest_ranges)
+
+    for col in biggest_ranges.column:
+        col_part_dep = partial_dependences_df.loc[partial_dependences_df.column == col]
+        plt.plot(col_part_dep.Value, col_part_dep.AvgPred)
+        plt.xlabel(f'{col} Test Value')
+        plt.title(f'Partial Dependence Plot for {col}')
+        plt.show()
 
 
 # Run portion ----
@@ -454,10 +527,10 @@ if __name__ == '__main__':
     nn_time, nn_clf = neural_network(
         X_train, y_train, 
         X_test, y_test,
-        hidden_layer_size = 512,
-        dropout_size = .5,
+        hidden_layer_size = 30,
+        dropout_size = .1,
         patience = 25, 
-        batch_size = 1
+        batch_size = 2
     )
     
     # random forest model
@@ -483,7 +556,10 @@ if __name__ == '__main__':
     
     model_stats
 
+    # Partial Dependence Analysis
     df_X = df.drop('Bankrupt?', axis = 1)
-    for col in df_X.columns:
-        partial_dependence_plot(clf = nn_clf, df_X = df_X, column = col, 
-                                scalers = scalers, num_test = 50)
+    partial_dependences_df, partial_dependences_stats = partial_dependence_loop(
+        df_X = df_X, clf = nn_clf, scalers = scalers, num_test = 15, show_plot = False
+    )       
+    plot_top_partial_dependences(partial_dependences_df, partial_dependences_stats, top_n = 5)
+
