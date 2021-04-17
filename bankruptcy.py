@@ -387,6 +387,37 @@ def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test):
     return mod_stats
 
 
+def partial_dependence_plot(clf, df_X, column, scalers, num_test = 50):
+    import matplotlib.pyplot as plt
+    
+    unique_val = df[column].unique()
+    
+    if len(unique_val) > num_test:
+        min_val = unique_val.min()
+        max_val = unique_val.max()
+        step = (max_val - min_val)/num_test
+        val_range = np.arange(min_val, max_val, step)
+    else:
+        val_range = np.sort(unique_val)
+        
+    df_copy = df_X.copy()
+    avg_preds = {'Value':[], 'AvgPred':[]}
+    for val in val_range:
+        df_copy[column] = val
+        df_copy_scl = scalers['X'].transform(df_copy)
+        preds = clf.predict(df_copy_scl)
+        avg_pred = preds.mean()
+        avg_preds['Value'].append(val)
+        avg_preds['AvgPred'].append(avg_pred)
+        
+    avg_preds = pd.DataFrame(avg_preds)
+    plt.plot(avg_preds.Value, avg_preds.AvgPred)
+    plt.xlabel(column)
+    plt.title(f'Partial Dependence Plot for {column}')
+    plt.show()
+        
+
+
 # Run portion ----
 if __name__ == '__main__':
     import pandas as pd
@@ -407,6 +438,9 @@ if __name__ == '__main__':
         y_train, y_test
     )
     
+    # Logisitc Regression
+    lr_time, lr_clf = logistic_regression(X_train, y_train)
+    
     # Nearest Neighbors - not sure if I did this correctly
     knn_time, knn_clf_results = nearest_neighbors(
         X_train, y_train, 
@@ -420,9 +454,9 @@ if __name__ == '__main__':
     nn_time, nn_clf = neural_network(
         X_train, y_train, 
         X_test, y_test,
-        hidden_layer_size = 64,
-        dropout_size = .25,
-        patience = 50, 
+        hidden_layer_size = 512,
+        dropout_size = .5,
+        patience = 25, 
         batch_size = 1
     )
     
@@ -438,12 +472,18 @@ if __name__ == '__main__':
     
     # Model Statistics
     model_stats = model_statistics(
-        clfs = [xgb_clf, knn_clf, nn_clf, rf_clf], 
-        train_times = [xgb_time, knn_time, nn_time, rf_time],
+        clfs = [xgb_clf, lr_clf, knn_clf, nn_clf, rf_clf], 
+        train_times = [xgb_time, lr_time, knn_time, nn_time, rf_time],
+
         X_train = X_train, 
         X_test = X_test, 
         y_train = y_train, 
         y_test = y_test
     )
     
-    print(model_stats)
+    model_stats
+
+    df_X = df.drop('Bankrupt?', axis = 1)
+    for col in df_X.columns:
+        partial_dependence_plot(clf = nn_clf, df_X = df_X, column = col, 
+                                scalers = scalers, num_test = 50)
