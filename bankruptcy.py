@@ -251,11 +251,21 @@ def nearest_neighbors(X_train, y_train, X_test, y_test, min_n, max_n):
 
 
 @time_it
-def random_forest(X_train, y_train):
+def random_forest(X_train, y_train, n_estimators = 5,
+                  criterion = 'entropy', random_state = 0):
     """
     Minoo
     """
+    from sklearn.ensemble import RandomForestClassifier
     
+    # Fitting Random Forest to the Training set:
+    clf = RandomForestClassifier(
+        n_estimators = n_estimators, 
+        criterion = criterion, 
+        random_state = random_state)
+    clf.fit(X_train, y_train)
+    
+
     return clf
 
 
@@ -419,20 +429,6 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test, scalers = prepare_model_data(
         df = clean_df, y_col = 'Bankrupt?'
     )
-
-    
-#     # Example_1 for the kmeans_clustering function using numpy arrays as inputs:
-#     X = np.array([[1, 3], [0, 4], [0, 3],
-#               [11, 0], [12, 7], [13, 0]])
-#     y = np.array([[1, 10], [17, 2]])
-#     result = kmeans_clustering(X, y)
-    
-#     # Example_2 for the kmeans_clustering function using pandas dataframe as inputs:
-#     data1 = [1,2,3,4,5,6,7,8,9,10]
-#     data2 = [6,7,1]
-#     X = pd.DataFrame(data1)
-#     y = pd.DataFrame(data2)
-#     result = kmeans_clustering(X, y)
     
     
     # Models 
@@ -464,11 +460,21 @@ if __name__ == '__main__':
         batch_size = 1
     )
     
+    # random forest model
+    rf_time, rf_clf = random_forest(
+        X_train,
+        y_train,
+        n_estimators=10,
+        criterion = 'entropy',
+        random_state = 0
+    )
+    
     
     # Model Statistics
     model_stats = model_statistics(
-        clfs = [xgb_clf, lr_clf, knn_clf, nn_clf], 
-        train_times = [xgb_time, lr_time, knn_time, nn_time],
+        clfs = [xgb_clf, lr_clf, knn_clf, nn_clf, rf_clf], 
+        train_times = [xgb_time, lr_time, knn_time, nn_time, rf_time],
+
         X_train = X_train, 
         X_test = X_test, 
         y_train = y_train, 
