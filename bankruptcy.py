@@ -60,7 +60,8 @@ def clean_data(df):
     return df
 
 def prepare_model_data(df, y_col, drop_cols = [],
-                       test_size = .3, scale_x = True, scale_y = False):
+                       test_size = .3, scale_x = True, scale_y = False,
+                       oversample = True):
     """
     Purpose: This function prepares the data to be modeled by conducting a train/test split and standaridizng the data (subtracting mean dividing by standard deviation) if specified
     
@@ -72,6 +73,7 @@ def prepare_model_data(df, y_col, drop_cols = [],
             - default = 30%
         * scale_x = whether to scale the X variables with a StandardScaler
         * scale_y = whether to scale the y variable with a StandardScaler
+        * oversample = whether to oversample the training set
         
     Output:
         * X_train: data frame with predictor variables to train model on
@@ -83,6 +85,8 @@ def prepare_model_data(df, y_col, drop_cols = [],
     
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import StandardScaler
+    from imblearn.over_sampling import SMOTE
+    import matplotlib.pyplot as plt
     
     drop_cols.append(y_col)
     X = df.drop(drop_cols, axis='columns') 
@@ -91,6 +95,28 @@ def prepare_model_data(df, y_col, drop_cols = [],
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size)
     X_train, X_test, y_train, y_test = X_train.values, X_test.values, \
                                        y_train.values.ravel(), y_test.values.ravel()
+    
+    def plot_y(y):
+        index = [0, 1]
+        values = [sum(y == 0), sum(y == 1)]
+        plt.bar(index, values)
+        plt.ylabel('Count')
+        plt.title(f'Distribution of {y_col}');
+    
+    if oversample:
+        n = sum(y_train == 1)
+        y_before = y_train.copy()
+        print(f'Before oversampling, the minor class of the traing set has {n} samples.')
+        oversample = SMOTE()
+        X_train, y_train = oversample.fit_resample(X_train, y_train)
+        n = sum(y_train == 1)
+        print(f'After oversampling, the minor class of the traing set has {n} samples.')
+        plt.figure(figsize=(8,4))
+        plt.subplot(1,2,1)
+        plot_y(y_before)
+        plt.subplot(1,2,2)
+        plot_y(y_train)
+        plt.tight_layout()
     
     scalers = {}
     if scale_x:
@@ -135,47 +161,28 @@ def kmeans_clustering(X, y):
 
 # Create models ----
 @time_it
-def xgb(X_train, X_test, y_train, y_test):
+def xgb(X_train, y_train,
+        learning_rate=0.5, n_estimator=10, max_depth=5):
     """
+    Yang
     Purpose: This function creates an XGBoost classifier.
     
     Input:
         * X_train
-        * X_test
         * y_train
-        * y_test
-        * scalers: dictionary with fit scalers
     
     Output:
-        * clf: a trained XGBoost classifier
-        * results: a dict holding train_time, pred_time, acc_train, acc_test, f1_train, and f1_test
+        * clf: a fitted XGBoost classifier
     """
-    from time import time
     from xgboost import XGBClassifier
-    from sklearn.metrics import accuracy_score, f1_score 
 
     # Instantiate a classifier
-    clf = XGBClassifier(learning_rate=0.05, n_estimator=300, max_depth=5)
+    clf = XGBClassifier(learning_rate=learning_rate, 
+                        n_estimator=n_estimator, 
+                        max_depth=max_depth)
     
     # Fit the model to the training data
-    start1 = time() # get start time
     clf.fit(X_train, y_train)
-    end1 = time() # get end time
-    
-    # Make predictions for the train data and the test data
-    y_pred_train = clf.predict(X_train)
-    start2 = time() # get start time
-    y_pred_test = clf.predict(X_test)
-    end2 = time() # get end time
-    
-    # Evaluate model performance: training time, accuracy, F1 score
-    results = {}
-    results['train_time'] = end1 - start1 # training time in second
-    results['pred_time'] = end2 - start2 # prediction time in second
-    results['acc_train'] = accuracy_score(y_train, y_pred_train) # accuracy for train set
-    results['acc_test'] = accuracy_score(y_test, y_pred_test) # accuracy for test set
-    results['f1_train'] = f1_score(y_train, y_pred_train) # f1 score for train set
-    results['f1_test'] = f1_score(y_test, y_pred_test) # f1 score for test set
     
     return clf
 
@@ -507,8 +514,8 @@ if __name__ == '__main__':
     # Models 
     # xgboost model
     xgb_time, xgb_clf = xgb(
-        X_train, X_test, 
-        y_train, y_test
+        X_train, y_train,
+        learning_rate=0.5, n_estimator=10, max_depth=5
     )
     
     # Logisitc Regression
