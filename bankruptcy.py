@@ -278,7 +278,8 @@ def random_forest(X_train, y_train, n_estimators = 5,
 
 @time_it
 def neural_network(X_train, y_train, X_test, y_test,
-                   hidden_layer_size = 32, dropout_size = .1, 
+                   num_layers = 2,
+                   hidden_layer_size = 32, dropout_size = .25, 
                    patience = 10, batch_size = 2):
     """
     Tanner
@@ -298,13 +299,17 @@ def neural_network(X_train, y_train, X_test, y_test,
     model = Sequential()
 
     # Add Layers
-    model.add(Dense(X_train.shape[1], input_dim=X_train.shape[1], activation='relu'))
-    model.add(Dense(hidden_layer_size, activation = 'relu'))
+    model.add(Dense(hidden_layer_size, input_dim=X_train.shape[1], activation='relu'))
+    for i in np.arange(num_layers-1)+1:
+        model.add(Dense(hidden_layer_size, activation = 'relu'))
     model.add(Dropout(dropout_size))
     model.add(Dense(1, activation='sigmoid'))
+    
+    model.summary()
 
     # Callbacks
-    es = EarlyStopping(monitor = 'val_loss',
+    es = EarlyStopping(monitor = 'val_binary_accuracy',
+                       mode = 'max',
                        patience = patience, 
                        verbose = 1)
     callbacks = [es]
@@ -312,8 +317,8 @@ def neural_network(X_train, y_train, X_test, y_test,
     # Compile model
     model.compile(
         optimizer='adam',
-        loss='binary_crossentropy'
-#         metrics=['accuracy']
+        loss='binary_crossentropy',
+        metrics=['binary_accuracy']
     )
 
     # Fit Model
@@ -384,7 +389,32 @@ def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test):
     
     return mod_stats
 
+# Ensemble prediction ----
+def ensemble_prediction(clfs, model_stats, X):
+    clf_votes = pd.DataFrame({'Model':model_stats.Model,
+                              'NumVotes':np.round(model_stats.TestF1*100)})
+    
+    pred_votes = pd.DataFrame({
+        'Row':np.arange(X.shape[0]),
+        'Votes_0':np.repeat(0, X.shape[0]),
+        'Votes_1':np.repeat(0, X.shape[0])
+    })
+    for clf_num in range(len(clfs)):
+        clf = clfs[clf_num]
+        preds = clf.predict(X)
+        for row in range(len(preds)):
+            if preds[row] == 0:
+                pred_votes.iloc[row,1] = pred_votes.iloc[row,1] + clf_votes.iloc[clf_num,1]
+            if preds[row] == 1:
+                pred_votes.iloc[row,2] = pred_votes.iloc[row,2] + clf_votes.iloc[clf_num,1]
+    
+    pred_votes['FinalPred'] = pred_votes['Votes_1'] > pred_votes['Votes_0']
+    pred_votes['FinalPred'] = pred_votes['FinalPred'].map({False:0, True:1})
+    
+    return pred_votes, pred_votes.FinalPred.values
+    
 
+# Partial dependence ----
 def partial_dependence(clf, df_X, column, scalers, num_test = 30, show_plot = True):
     """
     Purpose:
@@ -435,7 +465,6 @@ def partial_dependence(clf, df_X, column, scalers, num_test = 30, show_plot = Tr
         plt.show()
     
     return avg_preds
-
 
 def partial_dependence_loop(clf, df_X, scalers, num_test, show_plot):
     """
@@ -534,10 +563,11 @@ if __name__ == '__main__':
     nn_time, nn_clf = neural_network(
         X_train, y_train, 
         X_test, y_test,
-        hidden_layer_size = 30,
-        dropout_size = .1,
-        patience = 25, 
-        batch_size = 2
+        num_layers = 1,
+        hidden_layer_size = 5000,
+        dropout_size = .90,
+        patience = 10, 
+        batch_size = 100
     )
     
     # random forest model
@@ -562,7 +592,34 @@ if __name__ == '__main__':
     )
     
     model_stats
+    
+    # Ensemble Prediction
+    train_ens_votes, train_ens_pred = ensemble_prediction(
+        clfs = [xgb_clf, lr_clf, knn_clf, nn_clf, rf_clf], 
+        model_stats = model_stats, 
+        X = X_train
+    )
+    
+    test_ens_votes, test_ens_pred = ensemble_prediction(
+        clfs = [xgb_clf, lr_clf, knn_clf, nn_clf, rf_clf], 
+        model_stats = model_stats, 
+        X = X_test
+    )
+    
+    from sklearn.metrics import accuracy_score, f1_score
+    train_acc = accuracy_score(y_true = y_train, y_pred = train_ens_pred)
+    test_acc = accuracy_score(y_true = y_test, y_pred = test_ens_pred)
+    
+    train_f1 = f1_score(y_true = y_train, y_pred = train_ens_pred)
+    test_f1 = f1_score(y_true = y_test, y_pred = test_ens_pred)
+    
+    print(f'Train Accuracy: {np.round(train_acc*100, 1)}%')
+    print(f'Test Accuracy: {np.round(test_acc*100, 1)}%')
+    print(f'Train F1: {np.round(train_f1*100, 1)}%')
+    print(f'Test F1: {np.round(test_f1*100, 1)}%')
 
+    
+    
     # Partial Dependence Analysis
     df_X = df.drop('Bankrupt?', axis = 1)
     partial_dependences_df, partial_dependences_stats = partial_dependence_loop(
