@@ -179,7 +179,8 @@ def xgb(X_train, y_train,
     # Instantiate a classifier
     clf = XGBClassifier(learning_rate=learning_rate, 
                         n_estimator=n_estimator, 
-                        max_depth=max_depth)
+                        max_depth=max_depth, 
+                        random_state=0)
     
     # Fit the model to the training data
     clf.fit(X_train, y_train)
@@ -188,7 +189,7 @@ def xgb(X_train, y_train,
 
 
 @time_it
-def logistic_regression(X_train, y_train):
+def logistic_regression(X_train, y_train, X_test, y_test):
     """
     Amelia
     """
@@ -294,6 +295,8 @@ def neural_network(X_train, y_train, X_test, y_test,
     from sklearn.model_selection import cross_val_score
     from sklearn.model_selection import StratifiedKFold
     
+    from numpy.random import seed
+    seed(1)
     
     # Create model
     model = Sequential()
@@ -539,7 +542,6 @@ if __name__ == '__main__':
         df = clean_df, y_col = 'Bankrupt?'
     )
     
-    
     # Models 
     # xgboost model
     xgb_time, xgb_clf = xgb(
@@ -564,7 +566,7 @@ if __name__ == '__main__':
         X_train, y_train, 
         X_test, y_test,
         num_layers = 1,
-        hidden_layer_size = 5000,
+        hidden_layer_size = 500,
         dropout_size = .90,
         patience = 10, 
         batch_size = 100
@@ -622,8 +624,9 @@ if __name__ == '__main__':
     
     # Partial Dependence Analysis
     df_X = df.drop('Bankrupt?', axis = 1)
-    partial_dependences_df, partial_dependences_stats = partial_dependence_loop(
+    
+    # Neural network
+    nn_partial_dependences_df, nn_partial_dependences_stats = partial_dependence_loop(
         df_X = df_X, clf = nn_clf, scalers = scalers, num_test = 15, show_plot = False
     )       
-    plot_top_partial_dependences(partial_dependences_df, partial_dependences_stats, top_n = 5)
-
+    plot_top_partial_dependences(nn_partial_dependences_df, nn_partial_dependences_stats, top_n = 5)
