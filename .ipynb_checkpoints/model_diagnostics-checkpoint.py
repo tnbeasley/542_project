@@ -25,6 +25,7 @@ def ensemble_prediction(clfs, model_stats, X):
     
     return pred_votes, pred_votes.FinalPred.values
 
+
 # Partial dependence ----
 def partial_dependence(clf, df_X, column, scalers, num_test = 30, show_plot = True):
     """
@@ -46,8 +47,9 @@ def partial_dependence(clf, df_X, column, scalers, num_test = 30, show_plot = Tr
     """
     import matplotlib.pyplot as plt
     import pandas as pd
+    import numpy as np
     
-    unique_val = df[column].unique()
+    unique_val = df_X[column].unique()
     
     if len(unique_val) > num_test:
         min_val = unique_val.min()
@@ -78,6 +80,7 @@ def partial_dependence(clf, df_X, column, scalers, num_test = 30, show_plot = Tr
     
     return avg_preds
 
+
 def partial_dependence_loop(clf, df_X, scalers, num_test, show_plot):
     """
     Purpose:
@@ -99,14 +102,13 @@ def partial_dependence_loop(clf, df_X, scalers, num_test, show_plot):
     partial_dependences = []
     counter = 1
     for col in df_X.columns:
-        part_dep = partial_dependence(clf = nn_clf, df_X = df_X, column = col,
+        part_dep = partial_dependence(clf = clf, df_X = df_X, column = col,
                                       scalers = scalers, num_test = num_test, show_plot = show_plot)
         partial_dependences.append(part_dep)
         print(f'Column {counter}/{len(df_X.columns)} complete')
         counter += 1
 
     partial_dependences_df = pd.concat(partial_dependences)
-
 
     partial_dependences_stats = partial_dependences_df\
         .groupby('column')['AvgPred']\
@@ -115,6 +117,7 @@ def partial_dependence_loop(clf, df_X, scalers, num_test, show_plot):
     partial_dependences_stats['range'] = partial_dependences_stats['max'] - partial_dependences_stats['min']
 
     return partial_dependences_df, partial_dependences_stats
+
 
 def plot_top_partial_dependences(partial_dependences_df, partial_dependences_stats, top_n):
     """

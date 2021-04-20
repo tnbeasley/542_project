@@ -50,3 +50,13 @@ print(f'Test Accuracy: {np.round(test_acc*100, 1)}%')
 print(f'\nTrain F1: {np.round(train_f1*100, 1)}%')
 print(f'Test F1: {np.round(test_f1*100, 1)}%')
 print(f'Best Model Test F1: {np.round(model_stats.TestF1.max()*100, 1)}%')
+
+
+# Partial Dependence Analysis
+df_X = df.drop('Bankrupt?', axis = 1)
+
+## Neural network
+nn_partial_dependences_df, nn_partial_dependences_stats = partial_dependence_loop(
+    df_X = df_X, clf = nn_clf, scalers = scalers, num_test = 15, show_plot = False
+)       
+plot_top_partial_dependences(nn_partial_dependences_df, nn_partial_dependences_stats, top_n = 5)
