@@ -100,6 +100,7 @@ def prepare_model_data(df, y_col, drop_cols = [],
         index = [0, 1]
         values = [sum(y == 0), sum(y == 1)]
         plt.bar(index, values)
+        plt.xticks(index, index)
         plt.ylabel('Count')
         plt.title(f'Distribution of {y_col}');
     
@@ -162,7 +163,8 @@ def kmeans_clustering(X, y):
 # Create models ----
 @time_it
 def xgb(X_train, y_train,
-        learning_rate=0.5, n_estimator=10, max_depth=5):
+        learning_rate=0.5, n_estimator=10, 
+        max_depth=5, random_state=0):
     """
     Yang
     Purpose: This function creates an XGBoost classifier.
@@ -175,15 +177,21 @@ def xgb(X_train, y_train,
         * clf: a fitted XGBoost classifier
     """
     from xgboost import XGBClassifier
+    from xgboost import plot_importance
+    import matplotlib.pyplot as plt
 
     # Instantiate a classifier
     clf = XGBClassifier(learning_rate=learning_rate, 
                         n_estimator=n_estimator, 
-                        max_depth=max_depth, 
-                        random_state=0)
+                        max_depth=max_depth,
+                        random_state=random_state)
     
     # Fit the model to the training data
     clf.fit(X_train, y_train)
+    
+    # Plot feature importances
+    plt.rcParams["figure.figsize"] = (10, 5)
+    plot_importance(clf, max_num_features=10)
     
     return clf
 
@@ -546,7 +554,8 @@ if __name__ == '__main__':
     # xgboost model
     xgb_time, xgb_clf = xgb(
         X_train, y_train,
-        learning_rate=0.5, n_estimator=10, max_depth=5
+        learning_rate=0.5, n_estimator=10, 
+        max_depth=5, random_state=0
     )
     
     # Logisitc Regression
