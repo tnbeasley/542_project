@@ -30,7 +30,7 @@ if __name__ == '__main__':
         df_X = df_X, clf = xgb_clf, scalers = scalers, 
         num_test = num_tests, show_plot = False
     )
-    xgb_partial_dependences_df.to_csv('PartialDependence/xbg_pd_df.csv')
+    xgb_partial_dependences_df.to_csv('PartialDependence/xgb_pd_df.csv')
     xgb_partial_dependences_stats.to_csv('PartialDependence/xgb_pd_stats.csv')
     print('XGBoost Complete')
 
