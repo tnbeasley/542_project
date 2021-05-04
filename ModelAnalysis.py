@@ -56,20 +56,21 @@ model_stats_75 = pd.read_csv('Models/model_stats_75.csv')
 
 
 # Top Partial Dependence Plots
+top = 3
 ## XGBoost
 xgb_partial_dependences_df = pd.read_csv('PartialDependence/xgb_pd_df.csv')
 xgb_partial_dependences_stats = pd.read_csv('PartialDependence/xgb_pd_stats.csv')
-plot_top_partial_dependences(xgb_partial_dependences_df, xgb_partial_dependences_stats, top_n = 5)
+plot_top_partial_dependences(xgb_partial_dependences_df, xgb_partial_dependences_stats, top_n = top)
 
 ## Logistic Regression
 lr_partial_dependences_df = pd.read_csv('PartialDependence/lr_pd_df.csv')
 lr_partial_dependences_stats = pd.read_csv('PartialDependence/lr_pd_stats.csv')
-plot_top_partial_dependences(lr_partial_dependences_df, lr_partial_dependences_stats, top_n = 5)
+plot_top_partial_dependences(lr_partial_dependences_df, lr_partial_dependences_stats, top_n = top)
 
 ## K-Nearest Neighbors
-knn_partial_dependences_df = pd.read_csv('PartialDependence/lr_pd_df.csv')
-knn_partial_dependences_stats = pd.read_csv('PartialDependence/lr_pd_stats.csv')
-plot_top_partial_dependences(knn_partial_dependences_df, knn_partial_dependences_stats, top_n = 5)
+knn_partial_dependences_df = pd.read_csv('PartialDependence/knn_pd_df.csv')
+knn_partial_dependences_stats = pd.read_csv('PartialDependence/knn_pd_stats.csv')
+plot_top_partial_dependences(knn_partial_dependences_df, knn_partial_dependences_stats, top_n = top)
 
 ## Neural network
 nn_partial_dependences_df = pd.read_csv('PartialDependence/nn_pd_df.csv')
