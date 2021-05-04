@@ -81,6 +81,7 @@ def prepare_model_data(df, y_col, drop_cols = [],
     y = df[[y_col]]
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size)
+    column_names = X_train.columns
     X_train, X_test, y_train, y_test = X_train.values, X_test.values, \
                                        y_train.values.ravel(), y_test.values.ravel()
     
@@ -123,4 +124,4 @@ def prepare_model_data(df, y_col, drop_cols = [],
         y_test = scaler_y.transform(y_test.reshape(-1,1)).ravel()
         scalers['y'] = scaler_y
         
-    return X_train, X_test, y_train, y_test, scalers
+    return X_train, X_test, y_train, y_test, scalers, column_names

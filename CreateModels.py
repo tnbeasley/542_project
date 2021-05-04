@@ -13,7 +13,7 @@ if __name__ == '__main__':
     clean_df = clean_data(df)
 
     print('Train/Test Splitting Data')
-    X_train, X_test, y_train, y_test, scalers = prepare_model_data(
+    X_train, X_test, y_train, y_test, scalers, column_names = prepare_model_data(
         df = clean_df, y_col = 'Bankrupt?'
     )
     

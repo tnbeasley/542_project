@@ -13,7 +13,7 @@ from tensorflow import keras
 df = import_data()
 clean_df = clean_data(df)
 
-X_train, X_test, y_train, y_test, scalers = prepare_model_data(
+X_train, X_test, y_train, y_test, scalers, column_names = prepare_model_data(
     df = clean_df, y_col = 'Bankrupt?'
 )
 
@@ -81,3 +81,9 @@ plot_top_partial_dependences(nn_partial_dependences_df, nn_partial_dependences_s
 rf_partial_dependences_df = pd.read_csv('PartialDependence/rf_pd_df.csv')
 rf_partial_dependences_stats = pd.read_csv('PartialDependence/rf_pd_stats.csv')
 plot_top_partial_dependences(rf_partial_dependences_df, rf_partial_dependences_stats, top_n = 5)
+# Random Forest Variable Importance Levels
+rf_clf.fit(X_train, y_train)
+feature_importance = pd.DataFrame({'Variable':column_names,
+            'Importance':rf_clf.feature_importances_}).sort_values('Importance', ascending=False)
+print("Random Forest Feature Importance:\n")
+print(feature_importance.to_string())
