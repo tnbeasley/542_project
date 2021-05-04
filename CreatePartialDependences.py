@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
 
     df_X = clean_df.drop('Bankrupt?', axis = 1)
-    num_tests = 30
+    num_tests = 15
 
     ## XGBoost
     xgb_partial_dependences_df, xgb_partial_dependences_stats = partial_dependence_loop(
@@ -32,6 +32,7 @@ if __name__ == '__main__':
     )
     xgb_partial_dependences_df.to_csv('PartialDependence/xbg_pd_df.csv')
     xgb_partial_dependences_stats.to_csv('PartialDependence/xgb_pd_stats.csv')
+    print('XGBoost Complete')
 
 
     ## Logistic Regression
@@ -41,6 +42,7 @@ if __name__ == '__main__':
     )
     lr_partial_dependences_df.to_csv('PartialDependence/lr_pd_df.csv')
     lr_partial_dependences_stats.to_csv('PartialDependence/lr_pd_stats.csv')
+    print('Logistic Regression Complete')
 
 
     ## K-Nearest Neighbors
@@ -50,6 +52,7 @@ if __name__ == '__main__':
     )
     knn_partial_dependences_df.to_csv('PartialDependence/knn_pd_df.csv')
     knn_partial_dependences_stats.to_csv('PartialDependence/knn_pd_stats.csv')
+    print('K-Nearest Neighbors Complete')
 
 
     ## Neural network
@@ -59,6 +62,7 @@ if __name__ == '__main__':
     )
     nn_partial_dependences_df.to_csv('PartialDependence/nn_pd_df.csv')
     nn_partial_dependences_stats.to_csv('PartialDependence/nn_pd_stats.csv')
+    print('Neural Network Complete')
 
 
     ## Random Forest
@@ -68,5 +72,6 @@ if __name__ == '__main__':
     )
     rf_partial_dependences_df.to_csv('PartialDependence/rf_pd_df.csv')
     rf_partial_dependences_stats.to_csv('PartialDependence/rf_pd_stats.csv')
+    print('Random Forest Complete')
     
     print('Partial dependence files saved in PartialDependence folder')
