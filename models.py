@@ -181,7 +181,27 @@ def neural_network(X_train, y_train, X_test, y_test,
     
     return model
 
-def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test):
+def cross_val(clf, X, y, n_splits=5):
+    """
+    Inputs:
+    * clf = untrained model
+    * X = X data
+    * y = y data
+    
+    Output:
+    * F1 mean
+    * F1 standard deviation
+    """
+    import numpy as np
+    from sklearn.metrics import f1_score, make_scorer
+    from sklearn.model_selection import KFold, cross_val_score
+    
+    scorer = make_scorer(f1_score, average='micro')
+    cv = KFold(n_splits=n_splits, shuffle=True, random_state=0)
+    scores = cross_val_score(clf, X, y, scoring=scorer, cv=cv)
+    return round(np.mean(scores), 2), round(np.std(scores), 2)
+
+def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test, cutoff):
     """
     Inputs:
     * clfs = list of classifiers to compare
@@ -189,6 +209,8 @@ def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test):
     * X_test = predictor variables for test data set
     * y_train = variable of interest for train data set
     * y_test = variable of interest for test data set
+    * cutoff = the probability to begin predicting bankruptcy 
+        (i.e. 25% predicted chance of bankruptcy = predict bankruptcy)
     
     Output:
     * Data frame containing the following statistics for the classifiers:
@@ -196,15 +218,28 @@ def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test):
         - Accuracy
         - Precision
         - Recall
-        - F1 Score
+        - F1 Score: mean and standard deviation
+        
     """
     from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
     from scipy import stats
     import pandas as pd
     import numpy as np
+    from sklearn.model_selection import KFold, cross_val_score
+    from sklearn.metrics import make_scorer
     
-    train_preds = [np.round(mod.predict(X_train)) for mod in clfs]
-    test_preds =  [np.round(mod.predict(X_test))  for mod in clfs]
+    train_preds = []
+    test_preds = []
+    for mod in clfs:
+        if 'tensorflow' in str(type(mod)):
+            train_preds.append((mod.predict(X_train) > cutoff).astype('int').reshape(1,-1)[0])
+            test_preds.append((mod.predict(X_test) > cutoff).astype('int').reshape(1,-1)[0])
+        else:
+            train_preds.append(np.array([row[1] > cutoff for row in \
+                                         mod.predict_proba(X_train)]).astype('int'))
+            test_preds.append(np.array([row[1] > cutoff for row in \
+                                        mod.predict_proba(X_test)]).astype('int'))
+    
     mod_stats = pd.DataFrame({
         'Model':         [str(mod) for mod in clfs],
         'SecondsToTrain':[time for time in train_times],
