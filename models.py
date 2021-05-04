@@ -181,6 +181,26 @@ def neural_network(X_train, y_train, X_test, y_test,
     
     return model
 
+def cross_val(clf, X, y, n_splits=5):
+    """
+    Inputs:
+    * clf = untrained model
+    * X = X data
+    * y = y data
+    
+    Output:
+    * F1 mean
+    * F1 standard deviation
+    """
+    import numpy as np
+    from sklearn.metrics import f1_score, make_scorer
+    from sklearn.model_selection import KFold, cross_val_score
+    
+    scorer = make_scorer(f1_score, average='micro')
+    cv = KFold(n_splits=n_splits, shuffle=True, random_state=0)
+    scores = cross_val_score(clf, X, y, scoring=scorer, cv=cv)
+    return round(np.mean(scores), 2), round(np.std(scores), 2)
+
 def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test):
     """
     Inputs:
@@ -196,12 +216,15 @@ def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test):
         - Accuracy
         - Precision
         - Recall
-        - F1 Score
+        - F1 Score: mean and standard deviation
+        
     """
     from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
     from scipy import stats
     import pandas as pd
     import numpy as np
+    from sklearn.model_selection import KFold, cross_val_score
+    from sklearn.metrics import make_scorer
     
     train_preds = [np.round(mod.predict(X_train)) for mod in clfs]
     test_preds =  [np.round(mod.predict(X_test))  for mod in clfs]
