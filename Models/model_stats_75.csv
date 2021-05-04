@@ -1,0 +1,15 @@
+Model,SecondsToTrain,TrainPrecision,TestPrecision,TrainRecall,TestRecall,TrainF1,TestF1,TrainAccuracy,TestAccuracy
+"XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
+              colsample_bynode=1, colsample_bytree=1, gamma=0, gpu_id=-1,
+              importance_type='gain', interaction_constraints='',
+              learning_rate=0.5, max_delta_step=0, max_depth=5,
+              min_child_weight=1, missing=nan, monotone_constraints='()',
+              n_estimator=10, n_estimators=100, n_jobs=12, num_parallel_tree=1,
+              random_state=0, reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
+              subsample=1, tree_method='exact', validate_parameters=1,
+              verbosity=None)",1.6752221584320068,1.0,0.45,1.0,0.40298507462686567,1.0,0.4251968503937008,1.0,0.9643206256109482
+"LogisticRegression(random_state=0, solver='liblinear')",1.1752259731292725,0.9405697445972495,0.2980132450331126,0.829004329004329,0.6716417910447762,0.8812701334560514,0.41284403669724773,0.8883116883116883,0.9374389051808406
+KNeighborsClassifier(n_neighbors=2),8.630949974060059,1.0,0.25517241379310346,1.0,0.5522388059701493,1.0,0.34905660377358494,1.0,0.9325513196480938
+<tensorflow.python.keras.engine.sequential.Sequential object at 0x107089490>,43.92541313171387,0.9952596423184659,0.4482758620689655,0.9997835497835498,0.3880597014925373,0.9975164669042221,0.41600000000000004,0.9975108225108225,0.9643206256109482
+"RandomForestClassifier(criterion='entropy', n_estimators=10, random_state=0)",0.4034090042114258,1.0,0.3888888888888889,0.9937229437229437,0.31343283582089554,0.9968515904896319,0.347107438016529,0.9968614718614719,0.9613880742913001
+Naive,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.9672531769305963
