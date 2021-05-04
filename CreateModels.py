@@ -52,7 +52,7 @@ if __name__ == '__main__':
         X_train, y_train, 
         X_test, y_test,
         num_layers = 1,
-        hidden_layer_size = 1000,
+        hidden_layer_size = 250,
         dropout_size = .90,
         patience = 10, 
         batch_size = 100
