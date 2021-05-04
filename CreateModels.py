@@ -52,10 +52,10 @@ if __name__ == '__main__':
         X_train, y_train, 
         X_test, y_test,
         num_layers = 1,
-        hidden_layer_size = 250,
+        hidden_layer_size = 512,
         dropout_size = .90,
-        patience = 10, 
-        batch_size = 100
+        patience = 25, 
+        batch_size = 500
     )
     nn_clf.save('Models/nn.h5')
     print('Neural Network Model Saved')
@@ -74,7 +74,8 @@ if __name__ == '__main__':
     
     # Model Statistics
     print('Calculating Model Statistics')
-    model_stats_50 = model_statistics(
+       
+    model_stats_10 = model_statistics(
         clfs = [xgb_clf, lr_clf, knn_clf, nn_clf, rf_clf], 
         train_times = [xgb_time, lr_time, knn_time, nn_time, rf_time],
 
@@ -83,9 +84,9 @@ if __name__ == '__main__':
         y_train = y_train, 
         y_test = y_test,
         
-        cutoff = .5
+        cutoff = .10
     )
-    model_stats_50.to_csv('Models/model_stats_50.csv', index = False)
+    model_stats_10.to_csv('Models/model_stats_10.csv', index = False)
     
     model_stats_25 = model_statistics(
         clfs = [xgb_clf, lr_clf, knn_clf, nn_clf, rf_clf], 
@@ -99,4 +100,31 @@ if __name__ == '__main__':
         cutoff = .25
     )
     model_stats_25.to_csv('Models/model_stats_25.csv', index = False)
+    
+    model_stats_50 = model_statistics(
+        clfs = [xgb_clf, lr_clf, knn_clf, nn_clf, rf_clf], 
+        train_times = [xgb_time, lr_time, knn_time, nn_time, rf_time],
+
+        X_train = X_train, 
+        X_test = X_test, 
+        y_train = y_train, 
+        y_test = y_test,
+        
+        cutoff = .5
+    )
+    model_stats_50.to_csv('Models/model_stats_50.csv', index = False)
+    
+    model_stats_75 = model_statistics(
+        clfs = [xgb_clf, lr_clf, knn_clf, nn_clf, rf_clf], 
+        train_times = [xgb_time, lr_time, knn_time, nn_time, rf_time],
+
+        X_train = X_train, 
+        X_test = X_test, 
+        y_train = y_train, 
+        y_test = y_test,
+        
+        cutoff = .75
+    )
+    model_stats_75.to_csv('Models/model_stats_75.csv', index = False)
+    
     print('Model Statistics Saved')
