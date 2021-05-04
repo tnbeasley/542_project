@@ -93,9 +93,9 @@ def prepare_model_data(df, y_col, drop_cols = [],
     y = df[[y_col]]
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size)
+    column_names = X_train.columns
     X_train, X_test, y_train, y_test = X_train.values, X_test.values, \
                                        y_train.values.ravel(), y_test.values.ravel()
-    
     def plot_y(y):
         index = [0, 1]
         values = [sum(y == 0), sum(y == 1)]
@@ -136,8 +136,7 @@ def prepare_model_data(df, y_col, drop_cols = [],
         y_test = scaler_y.transform(y_test.reshape(-1,1)).ravel()
         scalers['y'] = scaler_y
         
-    return X_train, X_test, y_train, y_test, scalers
-
+    return X_train, X_test, y_train, y_test, scalers, column_names
 
 # KMeans ----
 @time_it
@@ -546,7 +545,7 @@ if __name__ == '__main__':
     df = import_data()
     clean_df = clean_data(df)
 
-    X_train, X_test, y_train, y_test, scalers = prepare_model_data(
+    X_train, X_test, y_train, y_test, scalers, column_names = prepare_model_data(
         df = clean_df, y_col = 'Bankrupt?'
     )
     
@@ -559,7 +558,7 @@ if __name__ == '__main__':
     )
     
     # Logisitc Regression
-    lr_time, lr_clf = logistic_regression(X_train, y_train)
+    lr_time, lr_clf = logistic_regression(X_train, y_train, X_test, y_test)
     
     # Nearest Neighbors - not sure if I did this correctly
     knn_time, knn_clf_results = nearest_neighbors(
@@ -581,7 +580,7 @@ if __name__ == '__main__':
         batch_size = 100
     )
     
-    # random forest model
+    # random forest model    
     rf_time, rf_clf = random_forest(
         X_train,
         y_train,
@@ -589,7 +588,10 @@ if __name__ == '__main__':
         criterion = 'entropy',
         random_state = 0
     )
-    
+    #random forest variable Importance Levels
+    rf_clf.fit(X_train, y_train)
+    feature_importance = pd.DataFrame({'Variable':column_names,
+                'Importance':rf_clf.feature_importances_}).sort_values('Importance', ascending=False)
     
     # Model Statistics
     model_stats = model_statistics(
@@ -602,7 +604,9 @@ if __name__ == '__main__':
         y_test = y_test
     )
     
-    model_stats
+    print(model_stats)
+    print("Random Forest Feature Importance:\n")
+    print(feature_importance.to_string())
     
     # Ensemble Prediction
     train_ens_votes, train_ens_pred = ensemble_prediction(
