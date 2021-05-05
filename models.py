@@ -3,7 +3,7 @@ from time_it import time_it
 # Create models ----
 @time_it
 def xgb(X_train, y_train,
-        learning_rate=0.5, n_estimator=10, 
+        learning_rate=0.5, n_estimator=50, 
         max_depth=5, random_state=0):
     """
     Yang
@@ -200,6 +200,24 @@ def cross_val(clf, X, y, n_splits=5):
     cv = KFold(n_splits=n_splits, shuffle=True, random_state=0)
     scores = cross_val_score(clf, X, y, scoring=scorer, cv=cv)
     return round(np.mean(scores), 2), round(np.std(scores), 2)
+
+def xgb_tune():
+    from xgboost import XGBClassifier
+    from sklearn.model_selection import KFold, GridSearchCV
+    from sklearn.metrics import f1_score, make_scorer
+    
+    clf = XGBClassifier(random_state=0)
+    parameters = {'n_estimators': [10, 50], 
+                  'learning_rate': [0.1, 0.5],
+                  'max_depth': [3, 5]}
+
+    scorer = make_scorer(f1_score, average='micro')
+    cv = KFold(n_splits=10, shuffle=True, random_state=0)
+    grid_obj = GridSearchCV(clf, parameters, scoring=scorer, cv=cv)
+    grid_fit = grid_obj.fit(X_train, y_train)
+    
+    return grid_fit.best_estimator_
+
 
 def model_statistics(clfs, train_times, X_train, X_test, y_train, y_test, cutoff):
     """
